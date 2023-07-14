@@ -17,6 +17,33 @@ import it.polito.tdp.itunes.model.Track;
 
 public class ItunesDAO {
 	
+	public int getBytesTrack(Track t) {
+		
+		final String sql = "SELECT t.Bytes "
+				+ "FROM track t "
+				+ "WHERE t.TrackId = ?";
+		
+		int bytes = 0;
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, t.getTrackId());
+			ResultSet res = st.executeQuery();
+
+			res.first();
+			
+			bytes = res.getInt("Bytes");
+			
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+		return bytes;
+		
+	}
+	
 	public List<Arco> getArchi(Genre g){
 		
 		final String sql = "SELECT t1.TrackId AS track1, t2.TrackId AS track2, SUM(t1.Milliseconds - t2.Milliseconds) AS delta "

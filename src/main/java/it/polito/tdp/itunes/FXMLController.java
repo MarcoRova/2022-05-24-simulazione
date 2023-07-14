@@ -52,6 +52,35 @@ public class FXMLController {
 
     @FXML
     void btnCreaLista(ActionEvent event) {
+    	
+    	this.txtResult.clear();
+    	
+    	Integer x = 0;
+    	try {
+    	    x = Integer.parseInt(this.txtMemoria.getText().strip());
+    	} catch (NumberFormatException e) {
+    	    txtResult.setText("Inserisci un valore numerico per la memoria.");
+    	    return;
+    	}
+    	if (x <= 0) { 
+    	    txtResult.setText("Inserisci un numero positivo.");
+    	    return;
+    	}
+    	
+    	Track pref = this.cmbCanzone.getValue();
+    	
+    	if(pref == null) {
+    		 txtResult.setText("Selezionare una canzone per continuare.");
+    		 return;
+    	}
+    	
+    	List<Track> percorso = this.model.percorso(pref, x);
+    	
+    	for(Track t : percorso) {
+    		this.txtResult.appendText("\n" + t.getName());
+    	}
+    	
+    	
 
     }
 
@@ -74,8 +103,8 @@ public class FXMLController {
     	this.btnMassimo.setDisable(false);
     	this.btnCreaLista.setDisable(false);
     	
-    	
-    	
+    	this.cmbCanzone.getItems().addAll(this.model.getVertici());      	
+	
     }
 
     @FXML
