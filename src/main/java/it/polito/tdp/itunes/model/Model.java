@@ -78,7 +78,12 @@ public class Model {
 				Track t1 = this.grafo.getEdgeTarget(d);
 				double p = grado;
 				max=grado;
-				
+				deltaMax.add(new DeltaMassimo(t1.getName(), t2.getName(), p));
+			}
+			else if(grado == max) {
+				Track t2 = this.grafo.getEdgeSource(d);
+				Track t1 = this.grafo.getEdgeTarget(d);
+				double p = grado;
 				deltaMax.add(new DeltaMassimo(t1.getName(), t2.getName(), p));
 			}
 		}
