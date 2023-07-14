@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import it.polito.tdp.itunes.model.Album;
+import it.polito.tdp.itunes.model.Arco;
 import it.polito.tdp.itunes.model.Artist;
 import it.polito.tdp.itunes.model.Genre;
 import it.polito.tdp.itunes.model.MediaType;
@@ -15,6 +16,60 @@ import it.polito.tdp.itunes.model.Playlist;
 import it.polito.tdp.itunes.model.Track;
 
 public class ItunesDAO {
+	
+	public List<Arco> getArchi(Genre g){
+		
+		final String sql = "SELECT t1.TrackId AS track1, t2.TrackId AS track2, SUM(t1.Milliseconds - t2.Milliseconds) AS delta "
+				+ "FROM track t1, track t2 "
+				+ "WHERE t1.MediaTypeId = t2.MediaTypeId AND t1.GenreId = ? AND t2.GenreId = ? AND t1.TrackId < t2.TrackId "
+				+ "GROUP BY t1.TrackId, t2.TrackId ";
+		List<Arco> result = new LinkedList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, g.getGenreId());
+			st.setInt(2, g.getGenreId());
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(new Arco(res.getInt("track1"), res.getInt("track2"), res.getDouble("delta")));
+			}
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+		return result;
+	}
+	
+	public List<Track> getTracksByGenre(Genre g){
+		
+		final String sql = "SELECT * "
+				+ "FROM track t "
+				+ "WHERE t.GenreId = ?";
+		List<Track> result = new ArrayList<Track>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, g.getGenreId());
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(new Track(res.getInt("TrackId"), res.getString("Name"), 
+						res.getString("Composer"), res.getInt("Milliseconds"), 
+						res.getInt("Bytes"),res.getDouble("UnitPrice")));
+			
+			}
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+		return result;
+		
+	}
 	
 	public List<Album> getAllAlbums(){
 		final String sql = "SELECT * FROM Album";
@@ -77,7 +132,7 @@ public class ItunesDAO {
 	}
 	
 	public List<Track> getAllTracks(){
-		final String sql = "SELECT * FROM Track";
+		final String sql = "SELECT * FROM Track ORDER BY Name";
 		List<Track> result = new ArrayList<Track>();
 		
 		try {
@@ -100,7 +155,7 @@ public class ItunesDAO {
 	}
 	
 	public List<Genre> getAllGenres(){
-		final String sql = "SELECT * FROM Genre";
+		final String sql = "SELECT * FROM Genre g ORDER BY g.Name";
 		List<Genre> result = new LinkedList<>();
 		
 		try {
